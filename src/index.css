@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+.need_background {
+    background: url('background_red_white.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    height: 100vh;
+    width: 100%;
+}
+
+.need_background > * {
+    backdrop-filter: blur(0px); /* Ensure content stays sharp */
+}
+
+.need_background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('background_red_white.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    filter: blur(5px); /* Adjust blur amount */
+    z-index: -1;
+}
+
+.need_background {
+    position: relative;
+    background: none; /* Remove original background */
+}
