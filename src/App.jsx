@@ -5,6 +5,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import CreationClient from "./pages/CreationClient";
 import NotFound from "./pages/NotFound";
+import Home from "./pages/Home";
+
 
 function Dashboard_temp() {
   return <h1 className="text-2xl p-4">Bienvenue sur le tableau de bord !</h1>;
@@ -14,7 +16,8 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
+        <Routes>  
+          <Route path="/" element={<Home />} />
           <Route
             path="/CreationClient"
             element={<CreationClient />}
@@ -22,7 +25,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/"
+            path="/home"
             element={
               <ProtectedRoute>
                 <Dashboard_temp />
