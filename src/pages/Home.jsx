@@ -247,7 +247,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
@@ -331,7 +331,7 @@ function Home() {
             </div>
 
             {/* Timer Card */}
-            <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {/* Client Selection */}
                 <div className="relative">
@@ -459,8 +459,8 @@ function Home() {
             </div>
 
             {/* Time Entries Table */}
-            <div className="bg-white rounded-xl shadow-sm border">
-              <div className="p-6 border-b">
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900">Dernières entrées de temps</h3>
               </div>
               <div className="overflow-x-auto">
@@ -492,13 +492,13 @@ function Home() {
             </div>
 
             {/* Chart Section */}
-            <div className="mt-6 bg-white rounded-xl shadow-sm border">
-              <div className="p-6 border-b">
+            <div className="mt-6 bg-white rounded-xl shadow-sm">
+              <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900">Répartition du temps par activité</h3>
               </div>
               <div className="p-6">
                 <img 
-                  src="https://pplx-res.cloudinary.com/image/upload/v1749546425/pplx_code_interpreter/2550914c_pgq4kw.jpg" 
+                  src="https://www.creativefabrica.com/wp-content/uploads/2021/04/28/Work-In-Progress-Grunge-Stamp-Graphics-11432470-1.jpg" 
                   alt="Répartition typique du temps passé par type d'activité dans un projet" 
                   className="w-full h-auto rounded-lg"
                 />
@@ -512,7 +512,7 @@ function Home() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
-            <div className="flex justify-between items-center p-6 border-b">
+            <div className="flex justify-between items-center p-6">
               <h3 className="text-xl font-semibold text-gray-900">Nouveau client</h3>
               <button
                 onClick={() => setShowModal(false)}
