@@ -29,6 +29,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
+            autoComplete="email"
             className="w-full p-2 border rounded"
             placeholder="Email"
             value={email}
@@ -36,7 +37,8 @@ export default function Login() {
             required
           />
           <input
-            type="current-password"
+            type="password"
+            autoComplete="current-password"
             className="w-full p-2 border rounded"
             placeholder="Mot de passe"
             value={password}

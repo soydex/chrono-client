@@ -1,12 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { API_URL } from '../utils/api';
+import axios from 'axios';
 
-export default function ClientAutocomplete({ value, onSelect }) {
+const ClientAutocomplete = ({ value, onSelect }) => {
+  const [options, setOptions] = useState([]);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [highlight, setHighlight] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get('/api/clients', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setOptions(response.data);
+      } catch (err) {
+        console.error('Erreur lors du chargement des clients :', err);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   useEffect(() => {
     if (query.length < 1) {
@@ -111,4 +130,6 @@ export default function ClientAutocomplete({ value, onSelect }) {
       )}
     </div>
   );
-}
+};
+
+export default ClientAutocomplete;

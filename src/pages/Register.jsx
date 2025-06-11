@@ -28,6 +28,8 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             name="name"
+            autoComplete="name"
+            type="text"
             className="w-full p-2 border rounded"
             placeholder="Nom"
             value={form.name}
@@ -37,6 +39,7 @@ export default function Register() {
           <input
             name="email"
             type="email"
+            autoComplete="email"
             className="w-full p-2 border rounded"
             placeholder="Email"
             value={form.email}
@@ -45,7 +48,8 @@ export default function Register() {
           />
           <input
             name="password"
-            type="new-password"
+            type="password"
+            autoComplete="new-password"
             className="w-full p-2 border rounded"
             placeholder="Mot de passe"
             value={form.password}
