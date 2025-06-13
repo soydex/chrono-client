@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../utils/api";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", JobTitle: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -43,6 +43,15 @@ export default function Register() {
             className="w-full p-2 border rounded"
             placeholder="Email"
             value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="JobTitle"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Poste"
+            value={form.JobTitle}
             onChange={handleChange}
             required
           />

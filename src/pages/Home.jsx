@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 
 const appData = {
   userData: {
@@ -11,11 +12,20 @@ const appData = {
     { id: 3, name: "MediaGroup", company: "MediaGroup International" },
     { id: 4, name: "Acme Inc.", company: "Acme Incorporated" },
     { id: 5, name: "Green Solutions", company: "Green Solutions SARL" },
-    { id: 6, name: "PixelWorks", company: "PixelWorks Agency" }
+    { id: 6, name: "PixelWorks", company: "PixelWorks Agency" },
+    { id: 7, name: "Global Tech", company: "Global Tech Solutions" },
+    { id: 8, name: "Creative Minds", company: "Creative Minds Studio" },
+    { id: 9, name: "NextGen Innovations", company: "NextGen Innovations Ltd" },
+    { id: 10, name: "Future Vision", company: "Future Vision Corp." },
+    { id: 11, name: "Digital Dynamics", company: "Digital Dynamics LLC" },
+    { id: 12, name: "Smart Systems", company: "Smart Systems Inc." },
+    { id: 13, name: "Tech Innovators", company: "Tech Innovators Group" },
+    { id: 14, name: "Design Hub", company: "Design Hub Agency" },
+    { id: 15, name: "Web Solutions", company: "Web Solutions Ltd" },  
   ],
-  projects: [
-    { id: 1, name: "Refonte site web", clientId: 1 },
-    { id: 2, name: "Campagne publicitaire Q2", clientId: 1 },
+  capsules: [
+    { id: 1, name: "Capsule Graphique", clientId: 1 },
+    { id: 2, name: "Capsule Digitale", clientId: 1 },
     { id: 3, name: "Application mobile", clientId: 2 },
     { id: 4, name: "Logo et charte graphique", clientId: 3 },
     { id: 5, name: "E-commerce plateforme", clientId: 2 },
@@ -26,65 +36,94 @@ const appData = {
     { id: 10, name: "Campagne réseaux sociaux", clientId: 5 },
     { id: 11, name: "Refonte identité visuelle", clientId: 6 },
     { id: 12, name: "Déploiement cloud", clientId: 2 },
-    { id: 13, name: "Maintenance applicative", clientId: 1 },
     { id: 14, name: "Création landing page", clientId: 6 },
     { id: 15, name: "Formation équipe", clientId: 4 },
     { id: 16, name: "Migration base de données", clientId: 5 },
     { id: 17, name: "Développement API", clientId: 2 },
     { id: 18, name: "Gestion newsletter", clientId: 3 },
     { id: 19, name: "Optimisation UX", clientId: 6 },
-    { id: 20, name: "Support technique", clientId: 1 }
+    { id: 20, name: "Support technique", clientId: 1 },
   ],
   timeEntries: [
-    { id: 1, client: "Acme Inc.", project: "Refonte site web", description: "Design page d'accueil", duration: "2h 15m", date: "10/06/2025" },
-    { id: 2, client: "TechStart", project: "Application mobile", description: "Wireframes", duration: "1h 30m", date: "09/06/2025" },
-    { id: 3, client: "MediaGroup", project: "Logo et charte graphique", description: "Recherche", duration: "45m", date: "09/06/2025" },
-    { id: 4, client: "Acme Inc.", project: "Campagne publicitaire Q2", description: "Concept visuel", duration: "3h 20m", date: "08/06/2025" }
-  ]
+    {
+      id: 1,
+      client: "Acme Inc.",
+      project: "Refonte site web",
+      description: "Design page d'accueil",
+      duration: "2h 15m",
+      date: "10/06/2025",
+    },
+    {
+      id: 2,
+      client: "TechStart",
+      project: "Application mobile",
+      description: "Wireframes",
+      duration: "1h 30m",
+      date: "09/06/2025",
+    },
+    {
+      id: 3,
+      client: "MediaGroup",
+      project: "Logo et charte graphique",
+      description: "Recherche",
+      duration: "45m",
+      date: "09/06/2025",
+    },
+    {
+      id: 4,
+      client: "Acme Inc.",
+      project: "Campagne publicitaire Q2",
+      description: "Concept visuel",
+      duration: "3h 20m",
+      date: "08/06/2025",
+    },
+  ],
 };
 
 function Home() {
+  const [userData, setUserData] = useState({ name: "", role: "" });
   const [timer, setTimer] = useState({
     isRunning: false,
     isPaused: false,
     startTime: null,
     pauseTime: 0,
     totalTime: 0,
-    display: '00:00:00'
+    display: "00:00:00",
   });
-  
+
   const [selectedClient, setSelectedClient] = useState(null);
-  const [selectedProject, setSelectedProject] = useState('');
-  const [clientInput, setClientInput] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
+  const [selectedProject, setSelectedProject] = useState("");
+  const [clientInput, setClientInput] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [timeEntries, setTimeEntries] = useState(appData.timeEntries);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState("light");
   const [filteredClients, setFilteredClients] = useState(appData.clients);
-  
+  const [showClientsPopup, setShowClientsPopup] = useState(false); // État pour afficher ou masquer le pop-up des clients
+
   const [newClient, setNewClient] = useState({
-    name: '',
-    company: '',
-    email: '',
-    phone: ''
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
   });
 
   const timerInterval = useRef(null);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
-    document.documentElement.setAttribute('data-color-scheme', savedTheme);
+    document.documentElement.setAttribute("data-color-scheme", savedTheme);
   }, []);
 
   useEffect(() => {
     if (timer.isRunning) {
       timerInterval.current = setInterval(() => {
         const currentTime = Date.now() - timer.startTime;
-        setTimer(prev => ({
+        setTimer((prev) => ({
           ...prev,
-          display: formatTime(currentTime)
+          display: formatTime(currentTime),
         }));
       }, 1000);
     } else {
@@ -94,12 +133,32 @@ function Home() {
     return () => clearInterval(timerInterval.current);
   }, [timer.isRunning, timer.startTime]);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const response = await axios.get("http://localhost:3000/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserData(response.data);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des données utilisateur:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const formatTime = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const formatDuration = (milliseconds) => {
@@ -114,101 +173,104 @@ function Home() {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
   const startTimer = () => {
     if (!clientInput || !selectedProject || !taskDescription) {
-      alert('Veuillez remplir tous les champs avant de démarrer le chronomètre.');
+      alert(
+        "Veuillez remplir tous les champs avant de démarrer le chronomètre."
+      );
       return;
     }
 
     if (timer.isPaused) {
-      setTimer(prev => ({
+      setTimer((prev) => ({
         ...prev,
         startTime: Date.now() - prev.pauseTime,
         isRunning: true,
-        isPaused: false
+        isPaused: false,
       }));
     } else {
-      setTimer(prev => ({
+      setTimer((prev) => ({
         ...prev,
         startTime: Date.now(),
         isRunning: true,
-        totalTime: 0
+        totalTime: 0,
       }));
     }
   };
 
   const pauseTimer = () => {
     if (timer.isRunning) {
-      setTimer(prev => ({
+      setTimer((prev) => ({
         ...prev,
         isRunning: false,
         isPaused: true,
-        pauseTime: Date.now() - prev.startTime
+        pauseTime: Date.now() - prev.startTime,
       }));
     }
   };
 
   const stopTimer = () => {
     if (timer.isRunning || timer.isPaused) {
-      const totalTime = timer.isPaused 
-        ? timer.pauseTime 
+      const totalTime = timer.isPaused
+        ? timer.pauseTime
         : Date.now() - timer.startTime;
-      
+
       addTimeEntry(totalTime);
-      
+
       setTimer({
         isRunning: false,
         isPaused: false,
         startTime: null,
         pauseTime: 0,
         totalTime: 0,
-        display: '00:00:00'
+        display: "00:00:00",
       });
-      
-      setTaskDescription('');
+
+      setTaskDescription("");
     }
   };
 
   const addTimeEntry = (duration) => {
     const formattedDuration = formatDuration(duration);
     const today = formatDate(new Date());
-    
+
     const newEntry = {
       id: timeEntries.length + 1,
       client: clientInput,
       project: selectedProject,
       description: taskDescription,
       duration: formattedDuration,
-      date: today
+      date: today,
     };
-    
-    setTimeEntries(prev => [newEntry, ...prev]);
+
+    setTimeEntries((prev) => [newEntry, ...prev]);
   };
 
   const handleClientInput = (value) => {
     setClientInput(value);
-    const filtered = appData.clients.filter(client => 
-      client.name.toLowerCase().includes(value.toLowerCase()) || 
-      client.company.toLowerCase().includes(value.toLowerCase())
+    const filtered = appData.clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(value.toLowerCase()) ||
+        client.company.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredClients(filtered);
-    
-    const exactMatch = appData.clients.find(client => 
-      client.name.toLowerCase() === value.toLowerCase()
+
+    const exactMatch = appData.clients.find(
+      (client) => client.name.toLowerCase() === value.toLowerCase()
     );
-    
+
     if (exactMatch) {
       setSelectedClient(exactMatch.id);
     } else {
       setSelectedClient(null);
-      setSelectedProject('');
+      setSelectedProject("");
     }
   };
 
@@ -219,10 +281,10 @@ function Home() {
   };
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-color-scheme', newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.setAttribute("data-color-scheme", newTheme);
   };
 
   const handleNewClientSubmit = (e) => {
@@ -230,18 +292,18 @@ function Home() {
     const client = {
       id: appData.clients.length + 1,
       name: newClient.name,
-      company: newClient.company
+      company: newClient.company,
     };
-    
+
     appData.clients.push(client);
     setClientInput(client.name);
     setSelectedClient(client.id);
     setShowModal(false);
-    setNewClient({ name: '', company: '', email: '', phone: '' });
+    setNewClient({ name: "", company: "", email: "", phone: "" });
   };
 
-  const availableProjects = selectedClient 
-    ? appData.projects.filter(project => project.clientId === selectedClient)
+  const availablecapsules = selectedClient
+    ? appData.capsules.filter((project) => project.clientId === selectedClient)
     : [];
 
   return (
@@ -251,12 +313,13 @@ function Home() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Chronoymedia</h1>
+            <img src="/comymedia.jpg" alt="Logo" className="h-10 w-10 mr-3 rounded-lg" />
+              <h1 className="text-2xl font-bold text-gray-900">Capsules y Média</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium">{appData.userData.name}</span>
+              <span className="text-gray-700 font-medium">{userData.name}</span>
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {appData.userData.role}
+                {userData.role || "Employé"}
               </span>
             </div>
           </div>
@@ -269,8 +332,16 @@ function Home() {
           <nav className="p-4">
             <ul className="space-y-2">
               <li>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a
+                  href="#"
+                  className="flex items-center gap-3 px-3 py-2 text-gray-700 bg-blue-50 rounded-lg"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
                     <rect x="14" y="14" width="7" height="7"></rect>
@@ -280,28 +351,52 @@ function Home() {
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button
+                  onClick={() => setShowClientsPopup(true)} // Afficher le pop-up des clients
+                  className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg w-full text-left"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
                   <span>Clients</span>
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a
+                  href="#"
+                  className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
                   </svg>
-                  <span>Projets</span>
+                  <span>Capsules</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a
+                  href="#"
+                  className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <line x1="18" y1="20" x2="18" y2="10"></line>
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -319,14 +414,16 @@ function Home() {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Suivi de temps</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Suivi de temps
+                </h2>
                 <p className="text-gray-600">{formatDate(new Date())}</p>
               </div>
               <button
                 onClick={toggleTheme}
                 className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
               >
-                {theme === 'dark' ? 'Mode Clair' : 'Mode Sombre'}
+                {theme === "dark" ? "Mode Clair" : "Mode Sombre"}
               </button>
             </div>
 
@@ -343,33 +440,47 @@ function Home() {
                     value={clientInput}
                     onChange={(e) => handleClientInput(e.target.value)}
                     onFocus={() => setShowClientDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
+                    onBlur={() =>
+                      setTimeout(() => setShowClientDropdown(false), 200)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Sélectionner un client"
                   />
-                  
+
                   {showClientDropdown && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {filteredClients.map(client => (
+                      {filteredClients.map((client) => (
                         <div
                           key={client.id}
                           onClick={() => selectClient(client)}
                           className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
                         >
-                          <div className="font-medium text-gray-900">{client.name}</div>
-                          <div className="text-sm text-gray-500">{client.company}</div>
+                          <div className="font-medium text-gray-900">
+                            {client.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {client.company}
+                          </div>
                         </div>
                       ))}
                       {filteredClients.length === 0 && clientInput && (
                         <div
                           onClick={() => {
-                            setNewClient(prev => ({ ...prev, name: clientInput }));
+                            setNewClient((prev) => ({
+                              ...prev,
+                              name: clientInput,
+                            }));
                             setShowModal(true);
                             setShowClientDropdown(false);
                           }}
                           className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-blue-600"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                           </svg>
@@ -380,10 +491,10 @@ function Home() {
                   )}
                 </div>
 
-                {/* Project Selection */}
+                {/* Capsule Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Projet
+                    Capsules
                   </label>
                   <select
                     value={selectedProject}
@@ -391,14 +502,15 @@ function Home() {
                     disabled={!selectedClient}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                   >
-                    <option value="">Sélectionner un projet</option>
-                    {availableProjects.map(project => (
+                    <option value="">Sélectionner une capsule</option>
+                    {availablecapsules.map((project) => (
                       <option key={project.id} value={project.name}>
                         {project.name}
                       </option>
                     ))}
                   </select>
                 </div>
+
               </div>
 
               {/* Task Description */}
@@ -426,31 +538,53 @@ function Home() {
                     disabled={timer.isRunning}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
-                    {timer.isPaused ? 'Reprendre' : 'Démarrer'}
+                    {timer.isPaused ? "Reprendre" : "Démarrer"}
                   </button>
-                  
+
                   <button
                     onClick={pauseTimer}
                     disabled={!timer.isRunning}
                     className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <rect x="6" y="4" width="4" height="16"></rect>
                       <rect x="14" y="4" width="4" height="16"></rect>
                     </svg>
                     Pause
                   </button>
-                  
+
                   <button
                     onClick={stopTimer}
                     disabled={!timer.isRunning && !timer.isPaused}
                     className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="2"
+                        ry="2"
+                      ></rect>
                     </svg>
                     Arrêter
                   </button>
@@ -461,29 +595,55 @@ function Home() {
             {/* Time Entries Table */}
             <div className="bg-white rounded-xl shadow-sm">
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900">Dernières entrées de temps</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Dernières entrées de temps
+                </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projet</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durée</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employé</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Client
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Capsule
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Durée
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Employé
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {timeEntries.map(entry => (
+                    {timeEntries.map((entry) => (
                       <tr key={entry.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.client}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.project}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.description}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.duration}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appData.userData.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.client}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.project}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.description}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.duration}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.date}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {appData.userData.name}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -494,12 +654,14 @@ function Home() {
             {/* Chart Section */}
             <div className="mt-6 bg-white rounded-xl shadow-sm">
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900">Répartition du temps par activité</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Répartition du temps par activité
+                </h3>
               </div>
               <div className="p-6">
-                <img 
-                  src="https://www.creativefabrica.com/wp-content/uploads/2021/04/28/Work-In-Progress-Grunge-Stamp-Graphics-11432470-1.jpg" 
-                  alt="Répartition typique du temps passé par type d'activité dans un projet" 
+                <img
+                  src="https://www.creativefabrica.com/wp-content/uploads/2021/04/28/Work-In-Progress-Grunge-Stamp-Graphics-11432470-1.jpg"
+                  alt="Répartition typique du temps passé par type d'activité dans une capsule"
                   className="w-full h-auto rounded-lg"
                 />
               </div>
@@ -510,20 +672,32 @@ function Home() {
 
       {/* Modal for New Client */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-grey/50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
             <div className="flex justify-between items-center p-6">
-              <h3 className="text-xl font-semibold text-gray-900">Nouveau client</h3>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Nouveau client
+              </h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
+
             <form onSubmit={handleNewClientSubmit} className="p-6">
               <div className="space-y-4">
                 <div>
@@ -533,12 +707,17 @@ function Home() {
                   <input
                     type="text"
                     value={newClient.name}
-                    onChange={(e) => setNewClient(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom de l'entreprise
@@ -546,12 +725,17 @@ function Home() {
                   <input
                     type="text"
                     value={newClient.company}
-                    onChange={(e) => setNewClient(prev => ({ ...prev, company: e.target.value }))}
+                    onChange={(e) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        company: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email
@@ -559,11 +743,16 @@ function Home() {
                   <input
                     type="email"
                     value={newClient.email}
-                    onChange={(e) => setNewClient(prev => ({ ...prev, email: e.target.value }))}
+                    onChange={(e) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Téléphone
@@ -571,12 +760,17 @@ function Home() {
                   <input
                     type="tel"
                     value={newClient.phone}
-                    onChange={(e) => setNewClient(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
@@ -593,6 +787,67 @@ function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up des clients */}
+      {showClientsPopup && (
+        <div className="fixed inset-0 bg-gray-800/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4">
+            <div className="flex justify-between items-center p-6">
+              <h3 className="text-xl font-semibold text-gray-900">Liste des clients</h3>
+              <button
+                onClick={() => setShowClientsPopup(false)} // Fermer le pop-up
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="overflow-x-auto p-6">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nom
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Entreprise
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {appData.clients.map((client) => (
+                    <tr key={client.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {client.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {client.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {client.company}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
