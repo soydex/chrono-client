@@ -81,7 +81,7 @@ const appData = {
 };
 
 function Home() {
-  const [userData, setUserData] = useState({ name: "", role: "" });
+  const [userData, setUserData] = useState({ name: "", JobTitle: "" });
   const [timer, setTimer] = useState({
     isRunning: false,
     isPaused: false,
@@ -319,7 +319,7 @@ function Home() {
             <div className="flex items-center gap-4">
               <span className="text-gray-700 font-medium">{userData.name}</span>
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {userData.role || "Employé"}
+                {userData.JobTitle || "Employé"}
               </span>
             </div>
           </div>

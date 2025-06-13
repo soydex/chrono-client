@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../utils/api";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "", JobTitle: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    JobTitle: "", // Modifié de jobTitle en JobTitle
+  });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -47,15 +52,6 @@ export default function Register() {
             required
           />
           <input
-            name="JobTitle"
-            type="text"
-            className="w-full p-2 border rounded"
-            placeholder="Poste"
-            value={form.JobTitle}
-            onChange={handleChange}
-            required
-          />
-          <input
             name="password"
             type="password"
             autoComplete="new-password"
@@ -65,8 +61,20 @@ export default function Register() {
             onChange={handleChange}
             required
           />
+          <input
+            name="JobTitle" // Modifié de jobTitle en JobTitle
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Poste"
+            value={form.JobTitle} // Modifié de jobTitle en JobTitle
+            onChange={handleChange}
+            required
+          />
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          >
             S'inscrire
           </button>
         </form>
